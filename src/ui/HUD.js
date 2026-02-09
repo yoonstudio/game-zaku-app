@@ -479,7 +479,7 @@ export class HUD {
       .hud-bottom-left {
         position: absolute;
         bottom: 20px;
-        left: 20px;
+        left: 240px;
       }
 
       .weapon-panel {
@@ -527,7 +527,7 @@ export class HUD {
       .hud-bottom-right {
         position: absolute;
         bottom: 20px;
-        right: 20px;
+        right: 240px;
         text-align: right;
       }
 
@@ -978,21 +978,15 @@ export class HUD {
         .mobile-only {
           display: flex !important;
         }
-        #game-hud .hud-bottom-left {
-          position: fixed !important;
-          top: 50% !important;
-          bottom: auto !important;
-          left: 10px !important;
-          transform: translateY(-50%) scale(0.65);
-          transform-origin: left center;
+        .hud-bottom-left {
+          bottom: 180px !important;
+          transform: scale(0.7);
+          transform-origin: bottom left;
         }
-        #game-hud .hud-bottom-right {
-          position: fixed !important;
-          top: 50% !important;
-          bottom: auto !important;
-          right: 10px !important;
-          transform: translateY(-50%) scale(0.65);
-          transform-origin: right center;
+        .hud-bottom-right {
+          bottom: 180px !important;
+          transform: scale(0.7);
+          transform-origin: bottom right;
         }
       }
 
