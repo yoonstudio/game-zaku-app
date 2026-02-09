@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zaku Colony Destroyer - MS-06 Zaku II</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset and Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+      cursor: crosshair;
+    }
+
+    /* Main App Container */
+    #app {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Canvas Styling */
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Loading Screen */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #000510 0%, #001a33 50%, #000510 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+
+    #loading-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 900;
+      color: #00ff88;
+      text-shadow: 0 0 30px #00ff88, 0 0 60px #00ff88;
+      margin-bottom: 10px;
+      letter-spacing: 5px;
+    }
+
+    .loading-subtitle {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 18px;
+      color: #00aaff;
+      letter-spacing: 8px;
+      margin-bottom: 50px;
+      text-transform: uppercase;
+    }
+
+    .loading-bar-container {
+      width: 300px;
+      height: 4px;
+      background: rgba(0, 255, 136, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .loading-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #00ff88, #00aaff);
+      border-radius: 2px;
+      animation: loading 2s ease-in-out forwards;
+      box-shadow: 0 0 20px #00ff88;
+    }
+
+    @keyframes loading {
+      0% { width: 0%; }
+      50% { width: 70%; }
+      100% { width: 100%; }
+    }
+
+    .loading-text {
+      font-size: 14px;
+      color: #00ff88;
+      margin-top: 20px;
+      letter-spacing: 3px;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0.3; }
+    }
+
+    /* Start Screen Overlay */
+    #start-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 5, 16, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    #start-screen.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .start-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 64px;
+      font-weight: 900;
+      color: #00ff88;
+      text-shadow: 0 0 40px #00ff88;
+      margin-bottom: 20px;
+      letter-spacing: 8px;
+    }
+
+    .start-subtitle {
+      font-size: 24px;
+      color: #00aaff;
+      letter-spacing: 10px;
+      margin-bottom: 60px;
+      text-transform: uppercase;
+    }
+
+    .start-instruction {
+      font-size: 20px;
+      color: #00ff88;
+      letter-spacing: 5px;
+      animation: pulse 2s infinite;
+      cursor: pointer;
+      padding: 20px 40px;
+      border: 2px solid rgba(0, 255, 136, 0.5);
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .start-instruction:hover {
+      background: rgba(0, 255, 136, 0.1);
+      border-color: #00ff88;
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.98); }
+    }
+
+    /* Controls Help */
+    .controls-help {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 30px;
+      font-size: 12px;
+      color: rgba(0, 170, 255, 0.7);
+      letter-spacing: 2px;
+    }
+
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-key {
+      background: rgba(0, 170, 255, 0.2);
+      border: 1px solid rgba(0, 170, 255, 0.4);
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+    }
+
+    /* Pointer Lock Message */
+    #pointer-lock-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 10, 20, 0.95);
+      border: 1px solid rgba(0, 255, 136, 0.5);
+      padding: 30px 50px;
+      border-radius: 8px;
+      text-align: center;
+      z-index: 1500;
+      display: none;
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+    }
+
+    #pointer-lock-message.visible {
+      display: block;
+    }
+
+    #pointer-lock-message h3 {
+      font-family: 'Orbitron', sans-serif;
+      color: #00ff88;
+      margin-bottom: 15px;
+      font-size: 18px;
+      letter-spacing: 3px;
+    }
+
+    #pointer-lock-message p {
+      color: #00aaff;
+      font-size: 14px;
+      letter-spacing: 2px;
+    }
+
+    /* Vignette Effect */
+    #vignette {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      background: radial-gradient(
+        ellipse at center,
+        transparent 0%,
+        transparent 60%,
+        rgba(0, 5, 16, 0.5) 100%
+      );
+    }
+
+    /* Scanlines Effect (subtle) */
+    #scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 998;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+    }
+
+    /* Game Over Screen */
+    #gameover-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 5, 16, 0.95);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+
+    #gameover-screen.visible {
+      display: flex;
+    }
+
+    .gameover-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 56px;
+      font-weight: 900;
+      color: #ff3333;
+      text-shadow: 0 0 40px #ff3333;
+      margin-bottom: 30px;
+      letter-spacing: 10px;
+    }
+
+    .gameover-title.victory {
+      color: #00ff88;
+      text-shadow: 0 0 40px #00ff88;
+    }
+
+    .final-score {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 36px;
+      color: #00aaff;
+      margin-bottom: 40px;
+    }
+
+    .retry-button {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      color: #00ff88;
+      background: transparent;
+      border: 2px solid #00ff88;
+      padding: 15px 40px;
+      cursor: pointer;
+      letter-spacing: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .retry-button:hover {
+      background: rgba(0, 255, 136, 0.2);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-title">ZAKU</div>
+    <div class="loading-subtitle">Colony Destroyer</div>
+    <div class="loading-bar-container">
+      <div class="loading-bar"></div>
+    </div>
+    <div class="loading-text">INITIALIZING SYSTEMS...</div>
+  </div>
+
+  <!-- Main App Container -->
+  <div id="app"></div>
+
+  <!-- Visual Effects -->
+  <div id="vignette"></div>
+  <div id="scanlines"></div>
+
+  <!-- Pointer Lock Message -->
+  <div id="pointer-lock-message">
+    <h3>CLICK TO ENGAGE</h3>
+    <p>Click anywhere to control the Zaku</p>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="gameover-screen">
+    <div class="gameover-title">MISSION FAILED</div>
+    <div class="final-score">SCORE: <span id="final-score-value">0</span></div>
+    <button class="retry-button" onclick="location.reload()">RETRY MISSION</button>
+  </div>
+
+  <!-- Main Script -->
+  <script type="module" src="/src/main.js"></script>
+
+  <!-- Hide loading screen after game loads -->
+  <script>
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loadingScreen = document.getElementById('loading-screen');
+        loadingScreen.classList.add('hidden');
+
+        // Show pointer lock message
+        setTimeout(() => {
+          const plMessage = document.getElementById('pointer-lock-message');
+          plMessage.classList.add('visible');
+
+          // Hide on pointer lock or when game over screen is active
+          document.addEventListener('pointerlockchange', () => {
+            const gameOverScreen = document.getElementById('game-over-screen');
+            const isGameOver = gameOverScreen && gameOverScreen.classList.contains('active');
+
+            if (document.pointerLockElement) {
+              plMessage.classList.remove('visible');
+            } else if (!isGameOver) {
+              plMessage.classList.add('visible');
+            } else {
+              plMessage.classList.remove('visible');
+            }
+          });
+        }, 500);
+      }, 2500);
+    });
+  </script>
+</body>
+</html>
