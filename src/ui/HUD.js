@@ -978,13 +978,21 @@ export class HUD {
         .mobile-only {
           display: flex !important;
         }
-        .hud-bottom-left,
-        .hud-bottom-right {
-          transform: scale(0.8);
-          transform-origin: bottom left;
+        #game-hud .hud-bottom-left {
+          position: fixed !important;
+          top: 50% !important;
+          bottom: auto !important;
+          left: 10px !important;
+          transform: translateY(-50%) scale(0.65);
+          transform-origin: left center;
         }
-        .hud-bottom-right {
-          transform-origin: bottom right;
+        #game-hud .hud-bottom-right {
+          position: fixed !important;
+          top: 50% !important;
+          bottom: auto !important;
+          right: 10px !important;
+          transform: translateY(-50%) scale(0.65);
+          transform-origin: right center;
         }
       }
 
