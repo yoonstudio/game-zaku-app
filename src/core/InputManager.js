@@ -1,6 +1,6 @@
 /**
  * InputManager
- * Handles keyboard and mouse input for the game
+ * Handles keyboard, mouse, and touch input for the game
  */
 
 import { KEYS } from '../utils/Constants.js';
@@ -26,6 +26,14 @@ export class InputManager {
       wheel: 0,
     };
 
+    // Touch state for virtual buttons
+    this.touchButtons = new Set();
+    this.touchButtonsJustPressed = new Set();
+    this.touchButtonsJustReleased = new Set();
+
+    // Check if mobile device
+    this.isMobile = this.detectMobile();
+
     // Pointer lock state
     this.isPointerLocked = false;
 
@@ -41,6 +49,13 @@ export class InputManager {
 
     // Initialize
     this.init();
+  }
+
+  // Detect mobile device
+  detectMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           ('ontouchstart' in window) ||
+           (navigator.maxTouchPoints > 0);
   }
 
   init() {
@@ -132,6 +147,47 @@ export class InputManager {
   // Check if key is a game key
   isGameKey(code) {
     return Object.values(KEYS).includes(code);
+  }
+
+  // Touch button handlers (called from HUD touch buttons)
+  onTouchButtonDown(keyCode) {
+    if (!this.keys.has(keyCode)) {
+      this.keysJustPressed.add(keyCode);
+    }
+    this.keys.add(keyCode);
+    this.touchButtons.add(keyCode);
+  }
+
+  onTouchButtonUp(keyCode) {
+    this.keys.delete(keyCode);
+    this.keysJustReleased.add(keyCode);
+    this.touchButtons.delete(keyCode);
+  }
+
+  // Touch fire button (simulates mouse click)
+  onTouchFireDown() {
+    if (!this.mouse.buttons.has(0)) {
+      this.mouse.buttonsJustPressed.add(0);
+    }
+    this.mouse.buttons.add(0);
+  }
+
+  onTouchFireUp() {
+    this.mouse.buttons.delete(0);
+    this.mouse.buttonsJustReleased.add(0);
+  }
+
+  // Touch view change (simulates right click)
+  onTouchViewDown() {
+    if (!this.mouse.buttons.has(2)) {
+      this.mouse.buttonsJustPressed.add(2);
+    }
+    this.mouse.buttons.add(2);
+  }
+
+  onTouchViewUp() {
+    this.mouse.buttons.delete(2);
+    this.mouse.buttonsJustReleased.add(2);
   }
 
   // Input state queries

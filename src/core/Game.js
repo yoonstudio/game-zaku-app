@@ -88,6 +88,9 @@ export class Game {
     // Create HUD
     this.hud = new HUD();
 
+    // Setup touch controls for mobile
+    this.hud.setupTouchControls(this.inputManager);
+
     // Setup event listeners
     this.setupEventListeners();
 

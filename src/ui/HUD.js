@@ -162,8 +162,8 @@ export class HUD {
         </div>
       </div>
 
-      <!-- Bottom Center: Keymap -->
-      <div class="hud-bottom-center">
+      <!-- Bottom Center: Keymap (Desktop only) -->
+      <div class="hud-bottom-center desktop-only">
         <div class="keymap-panel">
           <div class="keymap-row">
             <span class="key">W</span><span class="key-desc">전진</span>
@@ -182,6 +182,37 @@ export class HUD {
             <span class="key">R</span><span class="key-desc">초기화</span>
             <span class="key">L-CLICK</span><span class="key-desc">발사</span>
             <span class="key">R-CLICK</span><span class="key-desc">시점변경</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Touch Controls -->
+      <div class="touch-controls mobile-only" id="touch-controls">
+        <!-- Left Side: Movement Controls (6 buttons) -->
+        <div class="touch-pad touch-pad-left">
+          <div class="touch-row">
+            <button class="touch-btn" data-key="KeyQ">Q</button>
+            <button class="touch-btn" data-key="KeyW">W</button>
+            <button class="touch-btn" data-key="KeyE">E</button>
+          </div>
+          <div class="touch-row">
+            <button class="touch-btn" data-key="KeyA">A</button>
+            <button class="touch-btn" data-key="KeyS">S</button>
+            <button class="touch-btn" data-key="KeyD">D</button>
+          </div>
+        </div>
+
+        <!-- Right Side: Action Controls (6 buttons) -->
+        <div class="touch-pad touch-pad-right">
+          <div class="touch-row">
+            <button class="touch-btn" data-key="Space">UP</button>
+            <button class="touch-btn" data-key="ShiftLeft">DN</button>
+            <button class="touch-btn" data-key="ControlLeft">BST</button>
+          </div>
+          <div class="touch-row">
+            <button class="touch-btn touch-fire" data-action="fire">FIRE</button>
+            <button class="touch-btn touch-view" data-action="view">VIEW</button>
+            <button class="touch-btn" data-key="KeyR">R</button>
           </div>
         </div>
       </div>
@@ -931,6 +962,137 @@ export class HUD {
         display: flex;
         justify-content: center;
       }
+
+      /* Mobile/Desktop visibility */
+      .desktop-only {
+        display: block;
+      }
+      .mobile-only {
+        display: none;
+      }
+
+      @media (max-width: 768px), (pointer: coarse) {
+        .desktop-only {
+          display: none !important;
+        }
+        .mobile-only {
+          display: flex !important;
+        }
+        .hud-bottom-left,
+        .hud-bottom-right {
+          transform: scale(0.8);
+          transform-origin: bottom left;
+        }
+        .hud-bottom-right {
+          transform-origin: bottom right;
+        }
+      }
+
+      /* Touch Controls */
+      .touch-controls {
+        position: fixed;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 15px;
+        pointer-events: none;
+        z-index: 1001;
+      }
+
+      .touch-pad {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        pointer-events: auto;
+      }
+
+      .touch-pad-left {
+        align-items: flex-start;
+      }
+
+      .touch-pad-right {
+        align-items: flex-end;
+      }
+
+      .touch-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .touch-btn {
+        width: 60px;
+        height: 60px;
+        border: 2px solid ${UI_COLORS.primary};
+        border-radius: 8px;
+        background: rgba(0, 20, 40, 0.7);
+        color: ${UI_COLORS.primary};
+        font-family: 'Orbitron', 'Segoe UI', sans-serif;
+        font-size: 14px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        transition: all 0.1s ease;
+        text-shadow: 0 0 5px ${UI_COLORS.primary};
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+      }
+
+      .touch-btn:active,
+      .touch-btn.active {
+        background: ${UI_COLORS.primary};
+        color: #000;
+        box-shadow: 0 0 20px ${UI_COLORS.primary};
+        transform: scale(0.95);
+      }
+
+      .touch-fire {
+        border-color: ${UI_COLORS.danger};
+        color: ${UI_COLORS.danger};
+        text-shadow: 0 0 5px ${UI_COLORS.danger};
+        box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+      }
+
+      .touch-fire:active,
+      .touch-fire.active {
+        background: ${UI_COLORS.danger};
+        color: #000;
+        box-shadow: 0 0 20px ${UI_COLORS.danger};
+      }
+
+      .touch-view {
+        border-color: ${UI_COLORS.secondary};
+        color: ${UI_COLORS.secondary};
+        text-shadow: 0 0 5px ${UI_COLORS.secondary};
+        box-shadow: 0 0 10px rgba(0, 170, 255, 0.2);
+      }
+
+      .touch-view:active,
+      .touch-view.active {
+        background: ${UI_COLORS.secondary};
+        color: #000;
+        box-shadow: 0 0 20px ${UI_COLORS.secondary};
+      }
+
+      /* Larger touch targets for mobile */
+      @media (max-width: 480px) {
+        .touch-btn {
+          width: 50px;
+          height: 50px;
+          font-size: 12px;
+        }
+        .touch-row {
+          gap: 5px;
+        }
+        .touch-pad {
+          gap: 5px;
+        }
+      }
     `;
     document.head.appendChild(style);
   }
@@ -1242,6 +1404,74 @@ export class HUD {
     this.elements.rankingBackBtn.addEventListener('click', () => {
       this.hideRankings();
       if (onRankingBack) onRankingBack();
+    });
+  }
+
+  /**
+   * Set up touch controls for mobile
+   * @param {InputManager} inputManager - Reference to the input manager
+   */
+  setupTouchControls(inputManager) {
+    const touchControls = document.getElementById('touch-controls');
+    if (!touchControls) return;
+
+    // Store reference for cleanup
+    this.inputManager = inputManager;
+
+    // Get all touch buttons
+    const touchButtons = touchControls.querySelectorAll('.touch-btn');
+
+    touchButtons.forEach(btn => {
+      const keyCode = btn.dataset.key;
+      const action = btn.dataset.action;
+
+      // Handle touch start
+      const handleTouchStart = (e) => {
+        e.preventDefault();
+        btn.classList.add('active');
+
+        if (keyCode) {
+          inputManager.onTouchButtonDown(keyCode);
+        } else if (action === 'fire') {
+          inputManager.onTouchFireDown();
+        } else if (action === 'view') {
+          inputManager.onTouchViewDown();
+        }
+      };
+
+      // Handle touch end
+      const handleTouchEnd = (e) => {
+        e.preventDefault();
+        btn.classList.remove('active');
+
+        if (keyCode) {
+          inputManager.onTouchButtonUp(keyCode);
+        } else if (action === 'fire') {
+          inputManager.onTouchFireUp();
+        } else if (action === 'view') {
+          inputManager.onTouchViewUp();
+        }
+      };
+
+      // Touch events
+      btn.addEventListener('touchstart', handleTouchStart, { passive: false });
+      btn.addEventListener('touchend', handleTouchEnd, { passive: false });
+      btn.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+
+      // Mouse events for testing on desktop
+      btn.addEventListener('mousedown', handleTouchStart);
+      btn.addEventListener('mouseup', handleTouchEnd);
+      btn.addEventListener('mouseleave', (e) => {
+        if (btn.classList.contains('active')) {
+          handleTouchEnd(e);
+        }
+      });
+    });
+
+    // Prevent default touch behavior on the touch pads
+    const touchPads = touchControls.querySelectorAll('.touch-pad');
+    touchPads.forEach(pad => {
+      pad.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
     });
   }
 
